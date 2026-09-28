@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unicorn Math Hero 🦄</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Adding some custom animations */
+    @keyframes bounce-slow {
+      0%, 100% { transform: translateY(-5%); }
+      50% { transform: translateY(0); }
+    }
+    .animate-bounce-slow {
+      animation: bounce-slow 2s infinite;
+    }
+    /* Hide elements easily */
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body class="bg-pink-100 text-black font-sans min-h-screen select-none">
+
+  <!-- ==================== MENU VIEW ==================== -->
+  <div id="view-menu" class="flex flex-col items-center justify-center min-h-screen p-4 text-center">
+    <h1 class="text-5xl font-extrabold mb-2 text-black drop-shadow-md">🦄 Magic Math! ✨</h1>
+    <p class="text-xl mb-6 font-bold">Pick your times tables to practice:</p>
+    
+    <div id="table-buttons" class="flex flex-wrap justify-center gap-3 max-w-lg mb-8">
+      <!-- Buttons injected by JS -->
+    </div>
+
+    <button id="btn-start" onclick="startQuiz()" class="px-8 py-4 rounded-full text-3xl font-black shadow-xl transition-all bg-gray-400 cursor-not-allowed opacity-50" disabled>
+      Let's Go! 🚀
+    </button>
+
+    <div class="mt-12 bg-white border-4 border-black p-6 rounded-3xl shadow-xl max-w-md w-full">
+      <h2 class="text-2xl font-black mb-4">🏆 Your Ladder Level</h2>
+      <div id="ladder-graphic" class="text-6xl mb-2">🐴</div>
+      <p id="ladder-name" class="text-xl font-bold">Beginner Foal</p>
+      <p class="text-lg mt-2">Total Magic Points: <span id="total-score-display">0</span></p>
+    </div>
+
+    <button onclick="showView('hall')" class="mt-6 px-6 py-3 bg-pink-400 border-2 border-black rounded-full font-bold shadow-md hover:bg-pink-300">
+      View Hall of Squishies 🧸
+    </button>
+  </div>
+
+
+  <!-- ==================== QUIZ VIEW ==================== -->
+  <div id="view-quiz" class="hidden flex-col items-center justify-center min-h-screen bg-purple-100 p-4 text-center relative overflow-hidden">
+    <!-- Progress Bar -->
+    <div class="w-full max-w-lg bg-pink-200 rounded-full h-6 mb-8 border-2 border-black">
+      <div id="progress-bar" class="bg-purple-500 h-5 rounded-full transition-all duration-500" style="width: 0%"></div>
+    </div>
+
+    <h2 id="question-tracker" class="text-3xl font-bold mb-8">Question 1 of 10</h2>
+    
+    <div id="question-text" class="text-7xl font-black mb-12 drop-shadow-md">
+      2 × 2 = ?
+    </div>
+
+    <div id="options-container" class="grid grid-cols-2 gap-6 max-w-md w-full">
+      <!-- Options injected by JS -->
+    </div>
+
+    <!-- Feedback Overlay -->
+    <div id="feedback-overlay" class="hidden absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
+      <div id="feedback-box" class="text-6xl font-black p-10 rounded-3xl border-4 border-black shadow-2xl transform scale-110 animate-bounce bg-purple-400">
+        WOW! Correct! 🎉
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ==================== RESULT VIEW ==================== -->
+  <div id="view-result" class="hidden flex-col items-center justify-center min-h-screen bg-pink-100 p-4 text-center relative overflow-hidden">
+    
+    <!-- Confetti layer -->
+    <div id="confetti-layer" class="hidden absolute inset-0 pointer-events-none flex justify-around items-center animate-pulse text-6xl opacity-70">
+      <span>✨</span><span>🦄</span><span>🎉</span><span>🌈</span><span>✨</span>
+    </div>
+
+    <h1 id="result-title" class="text-6xl font-black mb-6 drop-shadow-md z-10">Great Job! ✨</h1>
+    
+    <p id="result-score" class="text-3xl font-bold mb-4 z-10">You got 0 out of 10 correct!</p>
+    <p id="result-points" class="text-2xl font-bold mb-8 z-10">You earned 0 Magic Points!</p>
+
+    <div id="new-squishy-alert" class="hidden bg-purple-200 border-4 border-black p-8 rounded-3xl shadow-2xl mb-8 z-10 animate-bounce">
+      <h2 class="text-2xl font-bold mb-4">You Won a New Squishy!</h2>
+      <div id="new-squishy-emoji" class="text-8xl">🦄</div>
+    </div>
+
+    <div class="flex gap-4 z-10">
+      <button onclick="showView('menu')" class="px-8 py-4 bg-purple-500 hover:bg-purple-400 border-4 border-black rounded-full text-2xl font-black shadow-xl transition-transform hover:scale-105">
+        Play Again 🚀
+      </button>
+      <button onclick="showView('hall')" class="px-8 py-4 bg-pink-400 hover:bg-pink-300 border-4 border-black rounded-full text-2xl font-black shadow-xl transition-transform hover:scale-105">
+        Hall of Squishies 🧸
+      </button>
+    </div>
+  </div>
+
+
+  <!-- ==================== HALL OF SQUISHIES VIEW ==================== -->
+  <div id="view-hall" class="hidden flex-col items-center min-h-screen bg-purple-100 p-8 text-center">
+    <h1 class="text-5xl font-black mb-8 drop-shadow-md">🧸 Hall of Squishies 🧸</h1>
+    
+    <div id="empty-hall" class="text-2xl font-bold bg-white border-4 border-black p-8 rounded-3xl">
+      Get a perfect 10/10 on a quiz to win your first squishy! 🦄
+    </div>
+    
+    <div id="full-hall" class="hidden bg-pink-200 border-4 border-black p-8 rounded-3xl w-full max-w-4xl shadow-xl">
+      <div id="squishy-grid" class="flex flex-wrap justify-center gap-6">
+        <!-- Squishies injected by JS -->
+      </div>
+    </div>
+
+    <button onclick="showView('menu')" class="mt-12 px-8 py-4 bg-purple-500 hover:bg-purple-400 border-4 border-black rounded-full text-2xl font-black shadow-xl transition-transform hover:scale-105">
+      Back to Menu 🏠
+    </button>
+  </div>
+
+  <!-- ==================== JAVASCRIPT LOGIC ==================== -->
+  <script>
+    // --- Data & State ---
+    const SQUISHIES = ['🦄', '💖', '⭐', '🌈', '🧁', '🎀', '🍬', '🍩', '🦋', '🌸', '🪄', '👑'];
+    const LADDER_LEVELS = [
+      { min: 0, name: "Beginner Foal", graphic: "🐴" },
+      { min: 50, name: "Sparkle Trotter", graphic: "✨" },
+      { min: 150, name: "Rainbow Galloper", graphic: "🌈" },
+      { min: 300, name: "Star Jumper", graphic: "⭐" },
+      { min: 500, name: "Majestic Unicorn", graphic: "🦄" }
+    ];
+
+    let selectedTables = [];
+    let questions = [];
+    let currentQIndex = 0;
+    let quizScore = 0;
+    let totalScore = parseInt(localStorage.getItem('unicorn_totalScore')) || 0;
+    let squishies = JSON.parse(localStorage.getItem('unicorn_squishies')) || [];
+    let isWaitingForNext = false;
+
+    // --- View Management ---
+    const views = ['menu', 'quiz', 'result', 'hall'];
+    function showView(viewName) {
+      views.forEach(v => document.getElementById(`view-${v}`).classList.add('hidden'));
+      document.getElementById(`view-${viewName}`).classList.remove('hidden');
+      
+      if (viewName === 'menu') renderMenu();
+      if (viewName === 'hall') renderHall();
+    }
+
+    // --- Menu Logic ---
+    function renderMenu() {
+      const btnContainer = document.getElementById('table-buttons');
+      btnContainer.innerHTML = '';
+      
+      for (let num = 2; num <= 12; num++) {
+        const isSelected = selectedTables.includes(num);
+        const btn = document.createElement('button');
+        btn.onclick = () => toggleTable(num);
+        btn.className = `w-16 h-16 rounded-full text-2xl font-bold shadow-lg transition-transform transform hover:scale-110 ${
+          isSelected ? 'bg-purple-400 border-4 border-black' : 'bg-pink-300 border-2 border-black opacity-80'
+        }`;
+        btn.innerText = `${num}x`;
+        btnContainer.appendChild(btn);
+      }
+
+      // Handle Let's Go button state
+      const startBtn = document.getElementById('btn-start');
+      if (selectedTables.length === 0) {
+        startBtn.disabled = true;
+        startBtn.className = "px-8 py-4 rounded-full text-3xl font-black shadow-xl transition-all bg-gray-400 cursor-not-allowed opacity-50";
+      } else {
+        startBtn.disabled = false;
+        startBtn.className = "px-8 py-4 rounded-full text-3xl font-black shadow-xl transition-all bg-purple-500 hover:bg-purple-400 hover:scale-105 active:scale-95 border-4 border-black";
+      }
+
+      // Update Ladder
+      let currentLevel = LADDER_LEVELS[0];
+      for (let i = LADDER_LEVELS.length - 1; i >= 0; i--) {
+        if (totalScore >= LADDER_LEVELS[i].min) {
+          currentLevel = LADDER_LEVELS[i];
+          break;
+        }
+      }
+      document.getElementById('ladder-graphic').innerText = currentLevel.graphic;
+      document.getElementById('ladder-name').innerText = currentLevel.name;
+      document.getElementById('total-score-display').innerText = totalScore;
+    }
+
+    function toggleTable(num) {
+      if (selectedTables.includes(num)) {
+        selectedTables = selectedTables.filter(n => n !== num);
+      } else {
+        selectedTables.push(num);
+      }
+      renderMenu();
+    }
+
+    // --- Quiz Logic ---
+    function startQuiz() {
+      if (selectedTables.length === 0) return;
+      
+      let allPossible = [];
+      selectedTables.forEach(table => {
+        for (let i = 1; i <= 12; i++) {
+          allPossible.push({ num1: table, num2: i, answer: table * i });
+        }
+      });
+      
+      // Shuffle & pick 10 unique
+      allPossible = allPossible.sort(() => 0.5 - Math.random());
+      questions = allPossible.slice(0, 10);
+      
+      quizScore = 0;
+      currentQIndex = 0;
+      isWaitingForNext = false;
+      
+      showView('quiz');
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      const currentQ = questions[currentQIndex];
+      
+      // Update UI texts
+      document.getElementById('progress-bar').style.width = `${(currentQIndex / 10) * 100}%`;
+      document.getElementById('question-tracker').innerText = `Question ${currentQIndex + 1} of 10`;
+      document.getElementById('question-text').innerText = `${currentQ.num1} × ${currentQ.num2} = ?`;
+
+      // Generate wrong options + 1 correct
+      let optionsSet = new Set([currentQ.answer]);
+      while (optionsSet.size < 4) {
+        const offset = Math.floor(Math.random() * 10) - 5;
+        const wrong = currentQ.answer + offset;
+        if (wrong > 0 && wrong !== currentQ.answer) optionsSet.add(wrong);
+      }
+      const optionsArr = Array.from(optionsSet).sort(() => 0.5 - Math.random());
+
+      // Render options
+      const optionsContainer = document.getElementById('options-container');
+      optionsContainer.innerHTML = '';
+      
+      optionsArr.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.innerText = opt;
+        btn.className = "bg-pink-400 hover:bg-pink-300 active:bg-pink-500 text-4xl font-black py-8 rounded-3xl border-4 border-black shadow-xl transform hover:scale-105 transition-all";
+        btn.onclick = () => handleAnswer(opt);
+        optionsContainer.appendChild(btn);
+      });
+    }
+
+    function handleAnswer(selectedAnswer) {
+      if (isWaitingForNext) return;
+      isWaitingForNext = true;
+
+      const currentQ = questions[currentQIndex];
+      const isCorrect = selectedAnswer === currentQ.answer;
+      
+      if (isCorrect) quizScore++;
+
+      // Show Feedback
+      const overlay = document.getElementById('feedback-overlay');
+      const box = document.getElementById('feedback-box');
+      overlay.classList.remove('hidden');
+      
+      if (isCorrect) {
+        box.innerText = 'WOW! Correct! 🎉';
+        box.className = "text-6xl text-center font-black p-10 rounded-3xl border-4 border-black shadow-2xl transform scale-110 animate-bounce bg-purple-400";
+      } else {
+        box.innerText = 'Oops! Next time! 🦄';
+        box.className = "text-6xl text-center font-black p-10 rounded-3xl border-4 border-black shadow-2xl transform scale-110 animate-bounce bg-pink-400";
+      }
+
+      setTimeout(() => {
+        overlay.classList.add('hidden');
+        if (currentQIndex < questions.length - 1) {
+          currentQIndex++;
+          isWaitingForNext = false;
+          renderQuestion();
+        } else {
+          finishQuiz();
+        }
+      }, 1200);
+    }
+
+    // --- Result Logic ---
+    function finishQuiz() {
+      const pointsEarned = quizScore * 10;
+      totalScore += pointsEarned;
+      localStorage.setItem('unicorn_totalScore', totalScore);
+
+      document.getElementById('result-title').innerText = quizScore === 10 ? 'PERFECT SCORE! 🌈' : 'Great Job! ✨';
+      document.getElementById('result-score').innerText = `You got ${quizScore} out of 10 correct!`;
+      document.getElementById('result-points').innerText = `You earned ${pointsEarned} Magic Points!`;
+
+      // Confetti & Squishy logic for 10/10
+      const confetti = document.getElementById('confetti-layer');
+      const squishyAlert = document.getElementById('new-squishy-alert');
+      
+      if (quizScore === 10) {
+        confetti.classList.remove('hidden');
+        squishyAlert.classList.remove('hidden');
+        
+        const randomSquishy = SQUISHIES[Math.floor(Math.random() * SQUISHIES.length)];
+        document.getElementById('new-squishy-emoji').innerText = randomSquishy;
+        
+        squishies.push(randomSquishy);
+        localStorage.setItem('unicorn_squishies', JSON.stringify(squishies));
+      } else {
+        confetti.classList.add('hidden');
+        squishyAlert.classList.add('hidden');
+      }
+
+      showView('result');
+    }
+
+    // --- Hall Logic ---
+    function renderHall() {
+      const emptyHall = document.getElementById('empty-hall');
+      const fullHall = document.getElementById('full-hall');
+      const grid = document.getElementById('squishy-grid');
+      
+      if (squishies.length === 0) {
+        emptyHall.classList.remove('hidden');
+        fullHall.classList.add('hidden');
+      } else {
+        emptyHall.classList.add('hidden');
+        fullHall.classList.remove('hidden');
+        
+        grid.innerHTML = '';
+        squishies.forEach(squishy => {
+          const div = document.createElement('div');
+          div.className = "bg-white border-2 border-black rounded-2xl p-4 text-6xl shadow-md transform hover:scale-110 transition-transform";
+          div.innerText = squishy;
+          grid.appendChild(div);
+        });
+      }
+    }
+
+    // Initialize the app on load
+    renderMenu();
+  </script>
+</body>
+</html>
